@@ -2010,7 +2010,7 @@
             if (!container) return;
             const arr = Array.from(participants);
             let html = '';
-            // Reverse the array so new participants appear at the top
+            // Reverse the array so new participants appear at the top (oldest at bottom)
             arr.reverse().forEach((u, i) => {
                 html += `<div class="participant-row"><span class="participant-name"><span class="participant-badge">УЧАСТВУЕТ</span><span>${i+1}. <b>${u}</b></span></span><label><input type="checkbox" checked onchange="toggleParticipantActive('${u.replace(/'/g, "\\'")}', this.checked)"></label></div>`;
             });
