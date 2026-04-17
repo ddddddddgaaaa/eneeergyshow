@@ -2008,7 +2008,7 @@
         function updateFullParticipantsList() {
             const container = document.getElementById('full-participants-list');
             if (!container) return;
-            const arr = Array.from(participants);
+            const arr = Array.from(participants).reverse();
             let html = '';
             arr.forEach((u, i) => {
                 html += `<div class="participant-row"><span class="participant-name"><span class="participant-badge">УЧАСТВУЕТ</span><span><b>${u}</b></span></span><label><input type="checkbox" checked onchange="toggleParticipantActive('${u.replace(/'/g, "\\'")}', this.checked)"></label></div>`;
