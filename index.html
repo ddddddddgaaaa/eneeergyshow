@@ -1843,6 +1843,8 @@
             const header = document.getElementById('participation-header');
             if (header) {
                 header.textContent = `ДЛЯ УЧАСТВИЯ В ПРОКАЧКЕ "${currentCodeword}" В ЧАТ`;
+                // Set color to match the current theme's accent color
+                header.style.color = 'var(--accent-neon-blue)';
             }
         }
         function openAuthModal() {
