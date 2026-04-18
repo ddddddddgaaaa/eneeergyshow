@@ -2522,11 +2522,11 @@
                 let displayName = String(name || '');
                 let chosenFont = maxFont;
                 for (let fs = maxFont; fs >= minFont; fs--) {
-                    ctx.font = `bold ${fs}px Inter`;
+                    ctx.font = `bold ${fs}px "New Times Roman"`;
                     const w = ctx.measureText(displayName).width;
                     if (w <= maxArcWidth) { chosenFont = fs; break; }
                 }
-                ctx.font = `bold ${minFont}px Inter`;
+                ctx.font = `bold ${minFont}px "New Times Roman"`;
                 if (ctx.measureText(displayName).width > maxArcWidth) {
                     let txt = displayName;
                     // Обрезаем имя постепенно, пока оно не поместится
@@ -2544,7 +2544,7 @@
                     }
                 }
                 ctx.fillStyle = '#ffffff';
-                ctx.font = `bold ${chosenFont}px Inter`;
+                ctx.font = `bold ${chosenFont}px "New Times Roman"`;
                 ctx.shadowBlur = 6;
                 ctx.shadowColor = 'rgba(0,0,0,0.9)';
                 ctx.textBaseline = 'middle';
@@ -2565,7 +2565,7 @@
             
             // Отображаем сумму в центре
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 10px Inter';
+            ctx.font = 'bold 10px "New Times Roman"';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.shadowBlur = 4;
