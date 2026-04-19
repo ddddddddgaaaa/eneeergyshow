@@ -1036,8 +1036,8 @@
 </head>
 <body>
     <div class="theme-switcher">
-        <label for="theme-select">Цвет</label>
-        <select id="theme-select" onchange="applyTheme(this.value)">
+        <label for="theme-select" style="margin-left: 30px;">Цвет</label>
+        <select id="theme-select" onchange="applyTheme(this.value)" style="margin-left: 30px;">
             <option value="pink">Розовый</option>
             <option value="blue">Синий</option>
             <option value="purple">Фиолетовый</option>
@@ -1527,16 +1527,11 @@
         }
 
         function loadSiteOptionsFromCloud() {
-            if (!cloudReady || !cloudDb) { 
-                siteOptions = JSON.parse(localStorage.getItem('bot_site_options') || '["КБ", "Дино", "Апгрейдер", "Ксгоран", "Жабка"]'); 
-                renderSiteSelects(); 
-                renderSiteOptionsList(); 
-                return; 
-            }
+            if (!cloudReady || !cloudDb) { siteOptions = JSON.parse(localStorage.getItem('bot_site_options') || '[]'); renderSiteSelects(); renderSiteOptionsList(); return; }
             cloudDb.collection('adminSettings').doc('sites').get().then(doc => {
                 if (doc.exists) {
                     const d = doc.data() || {};
-                    siteOptions = d.options || ["КБ", "Дино", "Апгрейдер", "Ксгоран", "Жабка"];
+                    siteOptions = d.options || [];
                     saveSiteOptionsLocal();
                     renderSiteSelects();
                     renderSiteOptionsList();
