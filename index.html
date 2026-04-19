@@ -1527,11 +1527,16 @@
         }
 
         function loadSiteOptionsFromCloud() {
-            if (!cloudReady || !cloudDb) { siteOptions = JSON.parse(localStorage.getItem('bot_site_options') || '[]'); renderSiteSelects(); renderSiteOptionsList(); return; }
+            if (!cloudReady || !cloudDb) { 
+                siteOptions = JSON.parse(localStorage.getItem('bot_site_options') || '["КБ", "Дино", "Апгрейдер", "Ксгоран", "Жабка"]'); 
+                renderSiteSelects(); 
+                renderSiteOptionsList(); 
+                return; 
+            }
             cloudDb.collection('adminSettings').doc('sites').get().then(doc => {
                 if (doc.exists) {
                     const d = doc.data() || {};
-                    siteOptions = d.options || [];
+                    siteOptions = d.options || ["КБ", "Дино", "Апгрейдер", "Ксгоран", "Жабка"];
                     saveSiteOptionsLocal();
                     renderSiteSelects();
                     renderSiteOptionsList();
@@ -2098,52 +2103,38 @@
             button.classList.toggle('is-ready', ready);
         }
         async function applyImportedParticipants() {
-    const raw = document.getElementById('import-textarea').value;
-    if (!raw.trim()) return;
-    let parsedNames = [];
-    try {
-        parsedNames = parseImportedParticipants(raw, selectedImportFormat);
-    } catch (error) {
-        alert('Ошибка импорта: ' + error.message);
-        return;
-    }
-    if (!parsedNames.length) {
-        alert('Не удалось найти участников в этом списке.');
-        return;
-    }
-    const replace = document.getElementById('import-replace-checkbox').checked;
-    // Add participants to wheel only
-    wheelParticipants = Array.isArray(wheelParticipants) ? wheelParticipants : [];
-    if (replace) {
-        wheelParticipants = parsedNames.filter(Boolean);
-    } else {
-        const set = new Set(wheelParticipants.concat(parsedNames.filter(Boolean)));
-        wheelParticipants = Array.from(set);
-    }
-    // Save wheel participants locally
-    try { localStorage.setItem('bot_wheel_participants', JSON.stringify(wheelParticipants)); } catch(e) { console.warn('wheel save error', e); }
-    document.getElementById('import-textarea').value = '';
-    document.getElementById('import-replace-checkbox').checked = false;
-    updateImportApplyState();
-    
-    // Check if the wheel modal was open before - if so, don't close import modal or reopen wheel
-    const wasWheelOpen = document.getElementById('wheel-modal').style.display === 'flex';
-    
-    if (!wasWheelOpen) {
-        // Only close import modal and do not call openWheel()
-        document.getElementById('import-participants-modal').style.display = 'none';
-        alert(`Добавлено в рулетку: ${parsedNames.length}`);
-    } else {
-        // Keep both modals open since wheel was already open
-        document.getElementById('import-participants-modal').style.display = 'none';
-        // Redraw the wheel to reflect the new participants
-        if (wheelParticipants.length > 0) {
-            drawWheel(0);
+            const raw = document.getElementById('import-textarea').value;
+            if (!raw.trim()) return;
+            let parsedNames = [];
+            try {
+                parsedNames = parseImportedParticipants(raw, selectedImportFormat);
+            } catch (error) {
+                alert('Ошибка импорта: ' + error.message);
+                return;
+            }
+            if (!parsedNames.length) {
+                alert('Не удалось найти участников в этом списке.');
+                return;
+            }
+            const replace = document.getElementById('import-replace-checkbox').checked;
+            // Добавляем только в рулетку (wheelParticipants), не трогаем основной список participants
+            wheelParticipants = Array.isArray(wheelParticipants) ? wheelParticipants : [];
+            if (replace) {
+                wheelParticipants = parsedNames.filter(Boolean);
+            } else {
+                const set = new Set(wheelParticipants.concat(parsedNames.filter(Boolean)));
+                wheelParticipants = Array.from(set);
+            }
+            // Сохраняем рулетку локально
+            try { localStorage.setItem('bot_wheel_participants', JSON.stringify(wheelParticipants)); } catch(e) { console.warn('wheel save error', e); }
+            document.getElementById('import-textarea').value = '';
+            document.getElementById('import-replace-checkbox').checked = false;
+            updateImportApplyState();
+            // Закрываем import modal и сразу открываем рулетку
+            document.getElementById('import-participants-modal').style.display = 'none';
+            openWheel();
+            alert(`Добавлено в рулетку: ${parsedNames.length}`);
         }
-        alert(`Добавлено в рулетку: ${parsedNames.length}`);
-    }
-}
-
         function pasteParticipants() { openImportParticipants(); }
         setInterval(() => { if (timerRunning && timerSeconds > 0) { timerSeconds--; updateTimerDisplay(); if(timerSeconds === 0) playAlarm(); } }, 1000);
         function saveWinnerStats() { 
@@ -2536,11 +2527,11 @@
                 let displayName = String(name || '');
                 let chosenFont = maxFont;
                 for (let fs = maxFont; fs >= minFont; fs--) {
-                    ctx.font = `bold ${fs}px New Times Roman`;
+                    ctx.font = `bold ${fs}px Inter`;
                     const w = ctx.measureText(displayName).width;
                     if (w <= maxArcWidth) { chosenFont = fs; break; }
                 }
-                ctx.font = `bold ${minFont}px New Times Roman`;
+                ctx.font = `bold ${minFont}px Inter`;
                 if (ctx.measureText(displayName).width > maxArcWidth) {
                     let txt = displayName;
                     // Обрезаем имя постепенно, пока оно не поместится
