@@ -1064,6 +1064,7 @@
             <button class="btn-main btn-codeword" onclick="changeCodeword()">КОД: <span id="codeword-display">+</span></button>
             <button class="btn-main btn-purple" onclick="openWheel()">РУЛЕТКА</button>
             <button class="btn-main btn-purple" onclick="instantRoll()">БЫСТРЫЙ РОЛЛ</button>
+            <button class="btn-main btn-purple" onclick="rollForNonWinners()">РОЛ ДЛЯ НЕ ВЫИГРЫВАВШИХ</button>
             <button class="btn-main" onclick="openStats()">АНАЛИТИКА ПРОЕКТОВ</button>
             <button class="btn-main" onclick="openHistory()">ИСТОРИЯ ВЫПАДЕНИЙ</button>
             <div style="margin-top: auto;">
@@ -1998,6 +1999,49 @@
                 alert('Список участников пуст!'); 
             } 
         }
+        function rollForNonWinners() {
+            // Get all participants who have never won
+            const allNames = Array.from(participants);
+            const winners = new Set(globalHistory.map(entry => entry.name.toLowerCase()));
+            const nonWinners = allNames.filter(name => !winners.has(name.toLowerCase()));
+            
+            if (nonWinners.length === 0) {
+                alert('Нет участников, которые еще не выигрывали!');
+                return;
+            }
+            
+            // Perform a random selection from non-winners
+            const winner = nonWinners[Math.floor(Math.random() * nonWinners.length)];
+            showWinnerRef(winner);
+        }
+
+        function updateFullParticipantsList() {
+            const container = document.getElementById('full-participants-list');
+            if (!container) return;
+            const arr = Array.from(participants).reverse();
+            let html = '';
+            
+            // Get all winners from history
+            const winners = new Set(globalHistory.map(entry => entry.name.toLowerCase()));
+            
+            arr.forEach((u, i) => {
+                // Check if this user has won before
+                const hasWon = winners.has(u.toLowerCase());
+                const statusClass = hasWon ? 'won-status' : 'not-won-status';
+                const statusText = hasWon ? 'ВЫИГРЫВАЛ' : 'НЕ ВЫИГРЫВАЛ';
+                
+                html += `<div class="participant-row">
+                    <span class="participant-name">
+                        <span class="participant-badge ${statusClass}">${statusText}</span>
+                        <span><b>${u}</b></span>
+                    </span>
+                    <label>
+                        <input type="checkbox" checked onchange="toggleParticipantActive('${u.replace(/'/g, "\\'")}', this.checked)">
+                    </label>
+                </div>`;
+            });
+            container.innerHTML = html || '<div style="color:#666; text-align:center; padding:30px 0;">Нет участников</div>';
+        }
         function toggleParticipantActive(name, active) {
             if (active) {
                 addParticipantToFirebase(name);
@@ -2005,18 +2049,6 @@
                 removeParticipantFromFirebase(name);
             }
         }
-        function updateFullParticipantsList() {
-            const container = document.getElementById('full-participants-list');
-            if (!container) return;
-            const arr = Array.from(participants).reverse();
-            let html = '';
-            arr.forEach((u, i) => {
-                html += `<div class="participant-row"><span class="participant-name"><span class="participant-badge">УЧАСТВУЕТ</span><span><b>${u}</b></span></span><label><input type="checkbox" checked onchange="toggleParticipantActive('${u.replace(/'/g, "\\'")}', this.checked)"></label></div>`;
-            });
-            container.innerHTML = html || '<div style="color:#666; text-align:center; padding:30px 0;">Нет участников</div>';
-        }
-        function initTwitchEmbed() {
-            const frame = document.getElementById('twitch-chat-frame');
             if (!frame) return;
             const safeChannelName = sanitizeChannelName(currentChannelName);
             if (!safeChannelName || !/^[a-z0-9_]{3,25}$/.test(safeChannelName)) {
