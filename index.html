@@ -165,16 +165,16 @@
         .theme-switcher {
             position: fixed;
             top: 24px;
-            left: 38px;
+            left: 68px;
             z-index: 10001;
             display: flex;
             align-items: center;
             gap: 8px;
             padding: 10px 12px;
             border-radius: 14px;
-            background: rgba(15, 23, 42, 0.94);
             border: 1px solid var(--panel-border);
             box-shadow: inset 0 0 18px rgba(0,0,0,0.28);
+            background: transparent; /* Ensure no background */
         }
         .theme-switcher label {
             font-size: 11px;
@@ -1036,8 +1036,8 @@
 </head>
 <body>
     <div class="theme-switcher">
-        <label for="theme-select" style="margin-left: 30px;">Цвет</label>
-        <select id="theme-select" onchange="applyTheme(this.value)" style="margin-left: 30px;">
+        <label for="theme-select" style="margin-left: -10px;">ЦВЕТ</label>
+        <select id="theme-select" onchange="applyTheme(this.value)" style="margin-left: 0px;">
             <option value="pink">Розовый</option>
             <option value="blue">Синий</option>
             <option value="purple">Фиолетовый</option>
