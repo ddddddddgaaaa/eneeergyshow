@@ -2049,6 +2049,8 @@
                 removeParticipantFromFirebase(name);
             }
         }
+        function initTwitchEmbed() {
+            const frame = document.getElementById('twitch-chat-frame');
             if (!frame) return;
             const safeChannelName = sanitizeChannelName(currentChannelName);
             if (!safeChannelName || !/^[a-z0-9_]{3,25}$/.test(safeChannelName)) {
@@ -3702,12 +3704,10 @@
             });
         }
 
-        // Переопределяем playAlarm для использования выбранной озвучки
-        const originalPlayAlarm = playAlarm;
-        playAlarm = function() {
+        // переопределяем playAlarm для использования выбранной озвучки
+        function playAlarm() {
             playTimerEndSound(selectedTimerSound);
-        };
-
+        }
     </script>
 
 </body>
