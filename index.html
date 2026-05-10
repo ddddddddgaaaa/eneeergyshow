@@ -1472,21 +1472,7 @@
         }
 
         // ===== Site options =====
-        let siteOptions = JSON.parse(localStorage.getItem('bot_site_options') || '[]');
-
-        function saveSiteOptionsLocal() {
-            localStorage.setItem('bot_site_options', JSON.stringify(siteOptions || []));
-        }
-
-        async function saveSiteOptionsCloud() {
-            try {
-                if (cloudReady && cloudDb) {
-                    await cloudDb.collection('adminSettings').doc('sites').set({ options: siteOptions || [], updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-                } else {
-                    saveSiteOptionsLocal();
-                }
-            } catch (e) { console.error('saveSiteOptionsCloud', e); }
-        }
+        const siteOptions = ['SkinBro', 'Petuh', 'SkinHouse', 'Upgrader', 'DinoDrop', 'SnakeSkin', 'Jabka', 'CSGORUN', 'Case-Battle'];
 
         function renderSiteSelects() {
             const winSel = document.getElementById('win-site-select');
@@ -1500,60 +1486,25 @@
         }
 
         function renderSiteOptionsList() {
+            const input = document.getElementById('site-option-input');
             const list = document.getElementById('site-options-list');
-            if (!list) return;
-            list.innerHTML = (siteOptions || []).map(s => `<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);"><span>${s}</span><button onclick="removeSiteOption('${encodeURIComponent(s)}')" style="background:none;border:1px solid rgba(255,255,255,0.06);padding:4px;border-radius:6px;color:var(--accent-neon-blue);">Удалить</button></div>`).join('') || '<div style="color:#666; padding:8px;">Нет сайтов</div>';
+            const section = input ? input.closest('div[style*="margin-bottom:20px"]') : (list ? list.closest('div[style*="margin-bottom:20px"]') : null);
+            if (section) section.style.display = 'none';
         }
 
         function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-        function addSiteOptionFromInput() {
-            const inp = document.getElementById('site-option-input');
-            if (!inp) return;
-            const v = inp.value.trim();
-            if (!v) return alert('Введите название сайта');
-            if (!siteOptions.includes(v)) siteOptions.push(v);
-            saveSiteOptionsCloud();
-            renderSiteOptionsList();
-            renderSiteSelects();
-            inp.value = '';
-        }
+        function addSiteOptionFromInput() { return; }
 
-        function removeSiteOption(enc) {
-            const v = decodeURIComponent(enc);
-            siteOptions = (siteOptions || []).filter(x => x !== v);
-            saveSiteOptionsCloud();
-            renderSiteOptionsList();
-            renderSiteSelects();
-        }
+        function removeSiteOption(enc) { return; }
 
         function loadSiteOptionsFromCloud() {
-            if (!cloudReady || !cloudDb) { siteOptions = JSON.parse(localStorage.getItem('bot_site_options') || '[]'); renderSiteSelects(); renderSiteOptionsList(); return; }
-            cloudDb.collection('adminSettings').doc('sites').get().then(doc => {
-                if (doc.exists) {
-                    const d = doc.data() || {};
-                    siteOptions = d.options || [];
-                    saveSiteOptionsLocal();
-                    renderSiteSelects();
-                    renderSiteOptionsList();
-                } else {
-                    siteOptions = JSON.parse(localStorage.getItem('bot_site_options') || '[]');
-                    renderSiteSelects(); renderSiteOptionsList();
-                }
-            }).catch(e => { console.error('loadSiteOptionsFromCloud', e); siteOptions = JSON.parse(localStorage.getItem('bot_site_options') || '[]'); renderSiteSelects(); renderSiteOptionsList(); });
+            renderSiteSelects();
+            renderSiteOptionsList();
         }
 
         function subscribeSiteOptionsFromCloud() {
-            if (!cloudReady || !cloudDb) return;
-            try {
-                cloudDb.collection('adminSettings').doc('sites').onSnapshot(doc => {
-                    if (!doc.exists) return;
-                    const d = doc.data() || {};
-                    siteOptions = d.options || [];
-                    saveSiteOptionsLocal();
-                    renderSiteSelects(); renderSiteOptionsList();
-                });
-            } catch (e) { console.error('subscribeSiteOptionsFromCloud', e); }
+            renderSiteSelects();
         }
 
         function renderAccountsList() {
@@ -3430,7 +3381,7 @@
                 <div id="admin-rig-status" style="font-size:14px; font-weight:600;"><span style="color:#64748b;">Подкрутка отключена</span></div>
             </div>
 
-            <div style="margin-bottom:20px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04);">
+            <div style="display:none; margin-bottom:20px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04);">
                 <div style="font-size:11px; color:#475569; text-transform:uppercase; margin-bottom:8px;">Аккаунты (регистрации)</div>
                 <div id="admin-accounts-list" style="max-height:220px; overflow:auto;">(нет данных)</div>
             </div>
