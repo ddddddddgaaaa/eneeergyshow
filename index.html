@@ -1061,7 +1061,7 @@
             </div>
             <div style="flex: 1;"></div>
             <button class="btn-main" onclick="resetAll()">Сброс участников</button>
-            <button class="btn-main btn-codeword" onclick="changeCodeword()">КОД: <span id="codeword-display">+</span></button>
+            <button class="btn-main btn-codeword" onclick="changeCodeword()">КОД: <span id="codeword-display">NRG</span></button>
             <button class="btn-main btn-purple" onclick="openWheel()">РУЛЕТКА</button>
             <button class="btn-main btn-purple" onclick="instantRoll()">БЫСТРЫЙ РОЛЛ</button>
             <button class="btn-main btn-purple" onclick="rollForNonWinners()">РОЛ ДЛЯ НЕ ВЫИГРЫВАВШИХ</button>
@@ -1110,7 +1110,7 @@
             </div>
         </div>
         <div class="panel panel-with-bg" style="padding: 15px;">
-            <div class="animated-header" id="participation-header">ДЛЯ УЧАСТИЯ В ПРОКАЧКЕ "<span id="header-codeword">+</span>" В ЧАТ!</div>
+            <div class="animated-header" id="participation-header">ДЛЯ УЧАСТИЯ В ПРОКАЧКЕ "<span id="header-codeword">NRG</span>" В ЧАТ!</div>
             <div class="middle-split">
                 <div class="red-participants">
                     <h4>СПИСОК УЧАСТНИКОВ <span id="user-count" style="font-size: 18px; color: var(--accent-neon-blue); font-weight: 800;">0</span></h4>
@@ -1250,7 +1250,7 @@
         let winnerHistoryLimit = Math.max(5, Math.min(10, parseInt(localStorage.getItem('bot_winner_history_limit') || '5', 10) || 5));
         let rerollCount = 0;
         let currentRotation = 0;
-        let currentCodeword = "+";
+        let currentCodeword = "NRG";
         let selectedImportFormat = 'csv';
         let autoSpinEnabled = false;
         let wheelParticipants = [];
