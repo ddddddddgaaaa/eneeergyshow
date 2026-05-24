@@ -327,6 +327,12 @@
             border-left-color: var(--accent-neon-blue);
             background: var(--accent-soft-bg);
         }
+        #leaderboard {
+            overflow-y: auto;
+            flex-grow: 1;
+            max-height: calc(5 * 62px);
+            padding-right: 4px;
+        }
         .part-chip {
             font-size: 11px;
             background: var(--accent-soft-bg);
@@ -416,7 +422,7 @@
             font-size: 14.5px;
             line-height: 1.65;
             color: #e0e7ff;
-            max-height: calc(18 * 36px);
+            max-height: calc(20 * 36px);
         }
         #full-participants-list div {
             padding: 5px 10px;
@@ -1127,7 +1133,7 @@
         </div>
         <div class="panel panel-with-bg">
             <h3 style="margin:0 0 15px 0; color: var(--accent-neon-blue); text-shadow: none; font-size: 14px;">ТОП (ВЫВОДЫ)</h3>
-            <div id="leaderboard" style="overflow-y:auto; flex-grow: 1;"></div>
+            <div id="leaderboard"></div>
             <div onclick="openAdminLogin()" style="position:absolute; bottom:2px; left:50%; transform:translateX(-50%); width:160px; height:22px; cursor:default; z-index:10000; background:transparent; border:none; outline:none;"></div>
         </div>
     </div>
