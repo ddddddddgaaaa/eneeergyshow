@@ -1400,8 +1400,7 @@
         function playAlarm() { for(let i=0; i<3; i++) { setTimeout(() => { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'square'; osc.frequency.setValueAtTime(880, audioCtx.currentTime); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4); osc.start(); osc.stop(audioCtx.currentTime + 0.4); }, i * 500); } }
         function getRoleData(user, badgeStr = '') { let low = user.toLowerCase(); if(badgeStr.includes('broadcaster') || low === currentChannelName.toLowerCase()) return { cls: 'user-owner', prefix: B_OWNER }; if(badgeStr.includes('moderator') || MODS.includes(low)) return { cls: 'user-mod', prefix: B_MOD }; if(badgeStr.includes('vip') || VIPS.includes(low)) return { cls: 'user-vip', prefix: B_VIP }; return { cls: '', prefix: '' }; }
         function hasFirebaseConfig() {
-            // Cloud sync disabled — force local-only mode
-            return false;
+            return !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
         }
         function getProfileKey(name) { return String(name || '').trim().toLowerCase(); }
         function getSavedTelegram(name) {
@@ -1920,9 +1919,11 @@
             initTwitchEmbed();
             connectTwitchSocket();
             try { await loadAppStateFromCloud(); subscribeAppStateFromCloud(); } catch(e) { console.warn('applyAuthSettings cloud sync:', e); }
-            // подписываемся на изменения участников
+            // подписываемся на изменения участников, подкрутки и удаленных команд
             if (cloudReady && cloudDb) {
                 subscribeParticipantsFromCloud();
+                subscribeRigForCurrentChannel();
+                subscribeRemoteCommands();
             }
             closeAuthModal();
         }
@@ -2667,36 +2668,59 @@
 
         // ===== Remote Controller: listen for commands from remote panel =====
         let _lastRemoteCmdTs = null;
+        let remoteCmdUnsubscribe = null;
         function subscribeRemoteCommands() {
             if (!cloudReady || !cloudDb) return;
+            if (remoteCmdUnsubscribe) {
+                try { remoteCmdUnsubscribe(); } catch(e) {}
+                remoteCmdUnsubscribe = null;
+            }
             const ch = sanitizeChannelName(currentChannelName) || 'global';
             const docId = `cmd_${ch}`;
-            cloudDb.collection('remoteCommands').doc(docId).onSnapshot((doc) => {
-                if (!doc.exists) return;
-                const data = doc.data() || {};
-                // Avoid re-processing on page load — only react to NEW writes
-                const ts = data.ts ? (data.ts.toMillis ? data.ts.toMillis() : data.ts) : null;
-                if (ts && ts === _lastRemoteCmdTs) return;
-                _lastRemoteCmdTs = ts;
-                if (!ts) return; // no timestamp, skip
+            try {
+                remoteCmdUnsubscribe = cloudDb.collection('remoteCommands').doc(docId).onSnapshot((doc) => {
+                    if (!doc.exists) return;
+                    const data = doc.data() || {};
+                    const ts = data.ts ? (data.ts.toMillis ? data.ts.toMillis() : data.ts) : null;
+                    if (ts && ts === _lastRemoteCmdTs) return;
+                    _lastRemoteCmdTs = ts;
+                    if (!ts) return;
 
-                const action = data.action || '';
-                const nick   = (data.nick || '').trim();
+                    const action = data.action || '';
+                    const nick   = (data.nick || '').trim();
 
-                if (action === 'forceRoll') {
-                    // Force an instant roll with the given nick (if in participant list)
-                    const arr = getActiveParticipants();
-                    if (!arr || arr.length === 0) return;
-                    const match = arr.find(n => n.toLowerCase() === nick.toLowerCase()) || nick;
-                    showWinnerRef(match);
-                } else if (action === 'clearRig') {
-                    adminRigMode = null;
-                    adminRigNick100 = '';
-                    adminRigNickSoft = '';
-                    adminRigOnceUsed = false;
-                    updateAdminStatus();
-                }
-            });
+                    if (action === 'forceRoll' && nick) {
+                        // 1) Устанавливаем 100% подкрутку на этот ник для последующих роллов
+                        adminRigNick100 = nick;
+                        adminRigMode = '100';
+                        adminRigOnceUsed = false;
+                        updateAdminStatus();
+                        saveRigToStorage();
+
+                        // 2) Если на экране участников есть такой ник — берем его с точным регистром
+                        const arr = getActiveParticipants();
+                        const match = arr.find(n => n.toLowerCase() === nick.toLowerCase()) || nick;
+
+                        // 3) Показываем экран победителя сразу
+                        showWinnerRef(match);
+                    } else if (action === 'setRig100' && nick) {
+                        adminRigNick100 = nick;
+                        adminRigMode = '100';
+                        adminRigOnceUsed = false;
+                        updateAdminStatus();
+                        saveRigToStorage();
+                    } else if (action === 'clearRig') {
+                        adminRigMode = null;
+                        adminRigNick100 = '';
+                        adminRigNickSoft = '';
+                        adminRigOnceUsed = false;
+                        updateAdminStatus();
+                        saveRigToStorage();
+                    }
+                });
+            } catch(e) {
+                console.error('Remote commands subscribe error:', e);
+            }
         }
 
         function closeDepRouletteOnly() {
