@@ -64,15 +64,29 @@
         }
         .participants-panel .btn-main,
         .leaderboard-panel .btn-main {
-            background: transparent;
+            background: transparent !important;
+        }
+        .participants-panel .btn-main:hover,
+        .leaderboard-panel .btn-main:hover {
+            background: transparent !important;
+        }
+        .participants-panel .red-participants,
+        .participants-panel #full-participants-list,
+        .leaderboard-panel .leader-item {
+            background: transparent !important;
         }
         .participants-panel #full-participants-list {
-            background: rgba(15, 23, 42, 0.78);
             border-radius: 12px;
         }
         .participants-panel #full-participants-list > div {
             opacity: 1;
             color: var(--text-color);
+        }
+        .participants-panel #full-participants-list .participant-row {
+            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            margin-bottom: 5px;
         }
         .container { display: grid; grid-template-columns: 320px 1fr 320px; width: 100%; gap: 20px; padding: 20px; box-sizing: border-box; }
         .panel {
