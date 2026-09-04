@@ -2912,9 +2912,9 @@
         }
         let remoteForceCommand = null;
         let instantRollInProgress = false;
-        async function claimRemoteForceCommand() {
-            if (!remoteForceCommand) return false;
-            const command = remoteForceCommand;
+        async function claimRemoteForceCommand(commandOverride = remoteForceCommand) {
+            if (!commandOverride) return false;
+            const command = commandOverride;
             const channel = sanitizeChannelName(currentChannelName) || 'global';
             try {
                 const { data, error } = await supabaseClient.from('remote_commands')
@@ -2939,18 +2939,19 @@
                 instantRollInProgress = false;
                 return alert('Нет участников!');
             }
-            const claimed = await claimRemoteForceCommand();
-            if (remoteForceCommand && !claimed) {
-                remoteForceCommand = null;
-                adminRigMode = null;
-                adminRigNick100 = '';
+            const remoteCommand = remoteForceCommand;
+            if (remoteCommand) {
+                adminRigNick100 = remoteCommand.nick;
+                adminRigMode = '100';
                 adminRigOnceUsed = false;
-                updateAdminStatus();
-                saveRigToStorage(false);
+                remoteForceCommand = null;
             }
             const win = pickRiggedWinner(arr);
             if (win) showWinnerRef(win);
             instantRollInProgress = false;
+            if (remoteCommand) {
+                claimRemoteForceCommand(remoteCommand).catch(error => console.error('Supabase command confirmation error:', error));
+            }
         }
 
         // ===== Remote Controller: listen for commands from remote panel =====
