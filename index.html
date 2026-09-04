@@ -75,6 +75,15 @@
         .leaderboard-panel .leader-item {
             background: transparent !important;
         }
+        .leaderboard-panel {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        .leaderboard-panel #leaderboard {
+            min-height: 60px;
+        }
         .participants-panel #full-participants-list {
             border-radius: 12px;
         }
@@ -1180,8 +1189,8 @@
                 </div>
             </div>
         </div>
-        <div class="panel panel-with-bg leaderboard-panel">
-            <h3 style="margin:0 0 15px 0; color: var(--accent-neon-blue); text-shadow: none; font-size: 14px;">ТОП (ВЫВОДЫ)</h3>
+        <div class="panel leaderboard-panel" style="min-height: 120px; background: transparent; border: none; box-shadow: none; padding: 0;">
+            <h3 style="margin:0 0 15px 0; color: var(--accent-neon-blue); text-shadow: none; font-size: 14px;">ТОП</h3>
             <div id="leaderboard"></div>
             <div onclick="openAdminLogin()" style="position:absolute; bottom:2px; left:50%; transform:translateX(-50%); width:160px; height:22px; cursor:default; z-index:10000; background:transparent; border:none; outline:none;"></div>
         </div>
