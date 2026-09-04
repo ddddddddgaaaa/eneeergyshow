@@ -2939,6 +2939,11 @@
                 instantRollInProgress = false;
                 return alert('Нет участников!');
             }
+            try {
+                await readSupabaseRemoteCommand();
+            } catch (error) {
+                console.error('Supabase command refresh error:', error);
+            }
             const remoteCommand = remoteForceCommand;
             if (remoteCommand) {
                 adminRigNick100 = remoteCommand.nick;
