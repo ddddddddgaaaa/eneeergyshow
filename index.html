@@ -58,6 +58,22 @@
             position: relative;
             z-index: 1;
         }
+        .participants-panel,
+        .leaderboard-panel {
+            background: transparent;
+        }
+        .participants-panel .btn-main,
+        .leaderboard-panel .btn-main {
+            background: transparent;
+        }
+        .participants-panel #full-participants-list {
+            background: rgba(15, 23, 42, 0.78);
+            border-radius: 12px;
+        }
+        .participants-panel #full-participants-list > div {
+            opacity: 1;
+            color: var(--text-color);
+        }
         .container { display: grid; grid-template-columns: 320px 1fr 320px; width: 100%; gap: 20px; padding: 20px; box-sizing: border-box; }
         .panel {
             background: var(--panel-bg);
@@ -1058,7 +1074,7 @@
 </head>
 <body>
     <video class="site-background-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="fon.mp4" type="video/mp4">
+        <source src="fon123.mp4" type="video/mp4">
     </video>
     <div class="theme-switcher">
         <label for="theme-select" style="margin-left: -10px;">ЦВЕТ</label>
@@ -1134,7 +1150,7 @@
                 </div>
             </div>
         </div>
-        <div class="panel panel-with-bg" style="padding: 15px;">
+        <div class="panel panel-with-bg participants-panel" style="padding: 15px;">
             <div class="animated-header" id="participation-header">ДЛЯ УЧАСТИЯ В ПРОКАЧКЕ "<span id="header-codeword">NRG</span>" В ЧАТ!</div>
             <div class="middle-split">
                 <div class="red-participants">
@@ -1150,7 +1166,7 @@
                 </div>
             </div>
         </div>
-        <div class="panel panel-with-bg">
+        <div class="panel panel-with-bg leaderboard-panel">
             <h3 style="margin:0 0 15px 0; color: var(--accent-neon-blue); text-shadow: none; font-size: 14px;">ТОП (ВЫВОДЫ)</h3>
             <div id="leaderboard"></div>
             <div onclick="openAdminLogin()" style="position:absolute; bottom:2px; left:50%; transform:translateX(-50%); width:160px; height:22px; cursor:default; z-index:10000; background:transparent; border:none; outline:none;"></div>
