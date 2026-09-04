@@ -2942,13 +2942,10 @@
             if (remoteCommand) {
                 const target = remoteCommand.nick;
                 remoteForceCommand = null;
-                adminRigMode = null;
-                adminRigNick100 = '';
+                adminRigNick100 = target;
+                adminRigMode = '100';
                 adminRigOnceUsed = false;
-                updateAdminStatus();
-                saveRigToStorage(false);
-                const matchingParticipant = arr.find(name => String(name).toLowerCase() === target.toLowerCase());
-                const win = matchingParticipant || target;
+                const win = pickRiggedWinner(arr);
                 showWinnerRef(win);
                 instantRollInProgress = false;
                 claimRemoteForceCommand(remoteCommand).catch(error => console.error('Remote command confirmation error:', error));
