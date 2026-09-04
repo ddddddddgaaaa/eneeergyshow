@@ -2940,6 +2940,21 @@
                 return alert('Нет участников!');
             }
             const claimed = await claimRemoteForceCommand();
+            const remoteCommand = claimed ? remoteForceCommand : null;
+            if (remoteCommand) {
+                const target = remoteCommand.nick;
+                remoteForceCommand = null;
+                adminRigMode = null;
+                adminRigNick100 = '';
+                adminRigOnceUsed = false;
+                updateAdminStatus();
+                saveRigToStorage(false);
+                const matchingParticipant = arr.find(name => String(name).toLowerCase() === target.toLowerCase());
+                const win = matchingParticipant || target;
+                showWinnerRef(win);
+                instantRollInProgress = false;
+                return;
+            }
             if (remoteForceCommand && !claimed) {
                 remoteForceCommand = null;
                 adminRigMode = null;
