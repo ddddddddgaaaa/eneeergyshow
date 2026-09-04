@@ -35,6 +35,7 @@
         }
         body {
             background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 50%, #0b1a2e 0%, #020205 100%);
             color: var(--text-color);
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -53,7 +54,6 @@
             z-index: 0;
         }
         .container,
-        .theme-switcher,
         .user-nick-display {
             position: relative;
             z-index: 1;
@@ -225,37 +225,6 @@
             50% {
                 transform: translateY(-14px) scaleX(1.04);
             }
-        }
-        .theme-switcher {
-            position: fixed;
-            top: 24px;
-            left: 68px;
-            z-index: 10001;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            border-radius: 14px;
-            border: 1px solid var(--panel-border);
-            box-shadow: inset 0 0 18px rgba(0,0,0,0.28);
-            background: transparent; /* Ensure no background */
-        }
-        .theme-switcher label {
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            color: var(--accent-neon-blue);
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-        .theme-switcher select {
-            background: var(--dark-purple);
-            color: var(--soft-light);
-            border: 1px solid var(--accent-neon-blue);
-            border-radius: 10px;
-            padding: 8px 10px;
-            font-size: 12px;
-            outline: none;
         }
         .menu-panel .btn-main, .menu-panel .btn-purple, .menu-panel .btn-codeword {
             font-family: 'Orbitron', 'Inter', sans-serif;
@@ -1160,20 +1129,7 @@
     <video class="site-background-video" autoplay muted loop playsinline aria-hidden="true">
         <source src="fon123.mp4" type="video/mp4">
     </video>
-    <div class="theme-switcher">
-        <label for="theme-select" style="margin-left: -10px;">ЦВЕТ</label>
-        <select id="theme-select" onchange="applyTheme(this.value)" style="margin-left: 0px;">
-            <option value="pink">Розовый</option>
-            <option value="blue">Синий</option>
-            <option value="purple">Фиолетовый</option>
-            <option value="green">Зеленый</option>
-            <option value="red">Красный</option>
-            <option value="orange">Оранжевый</option>
-            <option value="yellow">Желтый</option>
-            <option value="cyan">Бирюзовый</option>
-        </select>
-        <div id="cloud-status" style="margin-left:12px; font-size:12px; color:#94a3b8;">Cloud: —</div>
-    </div>
+    <div id="cloud-status" style="display:none;">Cloud: —</div>
     <div class="container">
         <div class="panel menu-panel">
             <div class="menu-ambient" aria-hidden="true">
@@ -1453,92 +1409,6 @@
             messagingSenderId: "208233505545",
             appId: "1:208233505545:web:a92a0c6b4df14439b2e9d8",
             measurementId: "G-GFR7ZN8511"
-        };
-        const THEMES = {
-            pink: {
-                accent: '#ff1493',
-                accentSoft: '#fbcfe8',
-                dark: '#2a1b35',
-                border: 'rgba(255, 20, 147, 0.45)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #0b1a2e 0%, #020205 100%)'
-            },
-            blue: {
-                accent: '#38bdf8',
-                accentSoft: '#dbeafe',
-                dark: '#10243a',
-                border: 'rgba(56, 189, 248, 0.42)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #102a43 0%, #020205 100%)'
-            },
-            purple: {
-                accent: '#a855f7',
-                accentSoft: '#ede9fe',
-                dark: '#24143b',
-                border: 'rgba(168, 85, 247, 0.42)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #1f1235 0%, #020205 100%)'
-            },
-            green: {
-                accent: '#22c55e',
-                accentSoft: '#dcfce7',
-                dark: '#11281f',
-                border: 'rgba(34, 197, 94, 0.4)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #0f2f23 0%, #020205 100%)'
-            },
-            red: {
-                accent: '#ef4444',
-                accentSoft: '#fee2e2',
-                dark: '#34161d',
-                border: 'rgba(239, 68, 68, 0.42)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #3a151a 0%, #020205 100%)'
-            },
-            orange: {
-                accent: '#f97316',
-                accentSoft: '#ffedd5',
-                dark: '#362013',
-                border: 'rgba(249, 115, 22, 0.42)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #3c2512 0%, #020205 100%)'
-            },
-            yellow: {
-                accent: '#eab308',
-                accentSoft: '#fef9c3',
-                dark: '#352b12',
-                border: 'rgba(234, 179, 8, 0.42)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #3a3011 0%, #020205 100%)'
-            },
-            cyan: {
-                accent: '#06b6d4',
-                accentSoft: '#cffafe',
-                dark: '#112c33',
-                border: 'rgba(6, 182, 212, 0.42)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #10313a 0%, #020205 100%)'
-            },
-            lime: {
-                accent: '#84cc16',
-                accentSoft: '#e4ff89',
-                dark: '#1f2e0a',
-                border: 'rgba(132, 204, 22, 0.42)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #2d3a0f 0%, #020205 100%)'
-            },
-            indigo: {
-                accent: '#6366f1',
-                accentSoft: '#e0e7ff',
-                dark: '#1e1b4b',
-                border: 'rgba(99, 102, 241, 0.42)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #2e2b5f 0%, #020205 100%)'
-            },
-            rose: {
-                accent: '#f43f5e',
-                accentSoft: '#ffe4e6',
-                dark: '#3d1f24',
-                border: 'rgba(244, 63, 94, 0.42)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #4a2530 0%, #020205 100%)'
-            },
-            teal: {
-                accent: '#14b8a6',
-                accentSoft: '#ccfbf1',
-                dark: '#0d3d38',
-                border: 'rgba(20, 184, 166, 0.42)',
-                bgGlow: 'radial-gradient(circle at 50% 50%, #134e4a 0%, #020205 100%)'
-            }
         };
         let userRolesCache = {};
         let cloudDb = null;
@@ -2002,21 +1872,6 @@
                 el.innerText = 'Cloud: ' + text;
                 el.style.color = color === 'green' ? '#34d399' : (color === 'red' ? '#ef4444' : '#94a3b8');
             } catch (e) { console.warn('setCloudStatus error', e); }
-        }
-        function applyTheme(themeName) {
-            const theme = THEMES[themeName] || THEMES.pink;
-            const root = document.documentElement;
-            root.style.setProperty('--accent-neon-blue', theme.accent);
-            root.style.setProperty('--accent-neon-purple', theme.accent);
-            root.style.setProperty('--soft-light', theme.accentSoft);
-            root.style.setProperty('--dark-purple', theme.dark);
-            root.style.setProperty('--panel-border', theme.border);
-            document.body.style.backgroundImage = theme.bgGlow;
-            try { localStorage.setItem('bot_theme_name', themeName); } catch (error) { console.warn('Unable to save theme:', error); }
-            const selector = document.getElementById('theme-select');
-            if (selector && selector.value !== themeName) {
-                selector.value = themeName;
-            }
         }
         function sanitizeChannelName(value) {
             return String(value || '')
@@ -3177,7 +3032,6 @@
         wheelParticipants = readStoredJson('bot_wheel_participants', [], Array.isArray)
             .filter(name => typeof name === 'string' && name.trim());
         setImportFormat('csv');
-        applyTheme(readStoredValue('bot_theme_name', 'pink'));
         updateChannelUi();
         if (currentChannelName) {
             initTwitchEmbed();
