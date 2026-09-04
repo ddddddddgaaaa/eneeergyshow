@@ -112,10 +112,18 @@
         }
         .menu-panel {
             overflow: hidden;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            padding: 0 !important;
         }
         .menu-panel > *:not(.menu-ambient) {
             position: relative;
             z-index: 1;
+        }
+        .menu-panel .menu-ambient {
+            display: none;
         }
         .menu-ambient {
             position: absolute;
