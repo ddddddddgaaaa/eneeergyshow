@@ -1259,7 +1259,11 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        const SUPABASE_URL = 'https://omtggzcaaymikqwfhtxv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_4PfWjbLXkoVLmIVZqaoviw_6DXg1PTk';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         function readStoredValue(key, fallback = '') {
             try {
                 return localStorage.getItem(key) ?? fallback;
@@ -2909,24 +2913,20 @@
         let remoteForceCommand = null;
         let instantRollInProgress = false;
         async function claimRemoteForceCommand() {
-            if (!remoteForceCommand || !cloudReady || !cloudDb) return false;
+            if (!remoteForceCommand) return false;
             const command = remoteForceCommand;
             const channel = sanitizeChannelName(currentChannelName) || 'global';
-            const commandRef = cloudDb.collection('remoteCommands').doc(`cmd_${channel}`);
             try {
-                return await cloudDb.runTransaction(async (transaction) => {
-                    const snapshot = await transaction.get(commandRef);
-                    const data = snapshot.exists ? snapshot.data() || {} : {};
-                    const sameCommand = data.commandId === command.commandId && data.consumed !== true;
-                    if (!sameCommand) return false;
-                    transaction.update(commandRef, {
-                        consumed: true,
-                        consumedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    });
-                    return true;
-                });
+                const { data, error } = await supabaseClient.from('remote_commands')
+                    .update({ consumed: true, consumed_at: new Date().toISOString() })
+                    .eq('channel', channel)
+                    .eq('command_id', command.commandId)
+                    .eq('consumed', false)
+                    .select('command_id');
+                if (error) throw error;
+                return Array.isArray(data) && data.length > 0;
             } catch (error) {
-                console.error('Remote command claim error:', error);
+                console.error('Supabase command claim error:', error);
                 return false;
             }
         }
@@ -2956,62 +2956,40 @@
         // ===== Remote Controller: listen for commands from remote panel =====
         let _lastRemoteCmdKey = null;
         let remoteCmdUnsubscribe = null;
-        function subscribeRemoteCommands() {
-            if (!cloudReady || !cloudDb) return;
-            if (remoteCmdUnsubscribe) {
-                try { remoteCmdUnsubscribe(); } catch (error) {}
-                remoteCmdUnsubscribe = null;
-            }
-            _lastRemoteCmdKey = null;
-
+        let remoteCommandPollTimer = null;
+        async function readSupabaseRemoteCommand() {
             const channel = sanitizeChannelName(currentChannelName) || 'global';
-            const docId = `cmd_${channel}`;
-            try {
-                remoteCmdUnsubscribe = cloudDb.collection('remoteCommands').doc(docId).onSnapshot((doc) => {
-                    if (!doc.exists) return;
-                    const data = doc.data() || {};
-                    const timestamp = data.ts && typeof data.ts.toMillis === 'function'
-                        ? data.ts.toMillis()
-                        : Number(data.ts);
-                    const commandKey = typeof data.commandId === 'string' && data.commandId
-                        ? data.commandId
-                        : (Number.isFinite(timestamp) ? String(timestamp) : null);
-                    if (!commandKey || commandKey === _lastRemoteCmdKey) return;
-                    _lastRemoteCmdKey = commandKey;
-
-                    const action = typeof data.action === 'string' ? data.action : '';
-                    const nick = typeof data.nick === 'string' ? data.nick.trim() : '';
-
-                    if ((action === 'forceRoll' || action === 'setRig100') && nick) {
-                        if (data.consumed === true) {
-                            remoteForceCommand = null;
-                            return;
-                        }
-                        remoteForceCommand = {
-                            commandId: typeof data.commandId === 'string' ? data.commandId : '',
-                            nick,
-                        };
-                        // The remote command only arms the next quick roll.
-                        adminRigNick100 = nick;
-                        adminRigMode = '100';
-                        adminRigOnceUsed = false;
-                        updateAdminStatus();
-                        saveRigToStorage(false);
-                    } else if (action === 'clearRig') {
-                        adminRigMode = null;
-                        adminRigNick100 = '';
-                        adminRigNickSoft = '';
-                        adminRigOnceUsed = false;
-                        updateAdminStatus();
-                        saveRigToStorage();
-                    }
-                }, (error) => {
-                    console.error('Remote commands subscription error:', error);
-                });
-            } catch (error) {
-                console.error('Remote commands subscribe error:', error);
-                remoteCmdUnsubscribe = null;
+            const { data, error } = await supabaseClient.from('remote_commands')
+                .select('*').eq('channel', channel).maybeSingle();
+            if (error) throw error;
+            if (!data) return;
+            const commandKey = data.command_id || String(data.ts || '');
+            if (!commandKey || commandKey === _lastRemoteCmdKey) return;
+            _lastRemoteCmdKey = commandKey;
+            if ((data.action === 'forceRoll' || data.action === 'setRig100') && data.nick && !data.consumed) {
+                remoteForceCommand = { commandId: data.command_id || '', nick: String(data.nick).trim() };
+                adminRigNick100 = remoteForceCommand.nick;
+                adminRigMode = '100';
+                adminRigOnceUsed = false;
+                updateAdminStatus();
+                saveRigToStorage(false);
+            } else if (data.action === 'clearRig') {
+                remoteForceCommand = null;
+                adminRigMode = null;
+                adminRigNick100 = '';
+                adminRigNickSoft = '';
+                adminRigOnceUsed = false;
+                updateAdminStatus();
+                saveRigToStorage(false);
             }
+        }
+        function subscribeRemoteCommands() {
+            if (remoteCommandPollTimer) clearInterval(remoteCommandPollTimer);
+            _lastRemoteCmdKey = null;
+            readSupabaseRemoteCommand().catch(error => console.error('Supabase commands read error:', error));
+            remoteCommandPollTimer = setInterval(() => {
+                readSupabaseRemoteCommand().catch(error => console.error('Supabase commands read error:', error));
+            }, 1000);
         }
 
         function closeDepRouletteOnly() {
