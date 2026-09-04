@@ -1053,6 +1053,7 @@
             <option value="yellow">Желтый</option>
             <option value="cyan">Бирюзовый</option>
         </select>
+        <div id="cloud-status" style="margin-left:12px; font-size:12px; color:#94a3b8;">Cloud: —</div>
     </div>
     <div class="container">
         <div class="panel menu-panel">
@@ -2907,9 +2908,9 @@
         }
         let remoteForceCommand = null;
         let instantRollInProgress = false;
-        async function claimRemoteForceCommand(commandOverride = remoteForceCommand) {
-            if (!commandOverride || !cloudReady || !cloudDb) return false;
-            const command = commandOverride;
+        async function claimRemoteForceCommand() {
+            if (!remoteForceCommand || !cloudReady || !cloudDb) return false;
+            const command = remoteForceCommand;
             const channel = sanitizeChannelName(currentChannelName) || 'global';
             const commandRef = cloudDb.collection('remoteCommands').doc(`cmd_${channel}`);
             try {
@@ -2938,18 +2939,14 @@
                 instantRollInProgress = false;
                 return alert('Нет участников!');
             }
-            const remoteCommand = remoteForceCommand;
-            if (remoteCommand) {
-                const target = remoteCommand.nick;
+            const claimed = await claimRemoteForceCommand();
+            if (remoteForceCommand && !claimed) {
                 remoteForceCommand = null;
-                adminRigNick100 = target;
-                adminRigMode = '100';
+                adminRigMode = null;
+                adminRigNick100 = '';
                 adminRigOnceUsed = false;
-                const win = pickRiggedWinner(arr);
-                showWinnerRef(win);
-                instantRollInProgress = false;
-                claimRemoteForceCommand(remoteCommand).catch(error => console.error('Remote command confirmation error:', error));
-                return;
+                updateAdminStatus();
+                saveRigToStorage(false);
             }
             const win = pickRiggedWinner(arr);
             if (win) showWinnerRef(win);
