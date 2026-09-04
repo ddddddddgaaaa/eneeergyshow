@@ -2906,17 +2906,55 @@
             }
             requestAnimationFrame(animate);
         }
-        function instantRoll() {
+        let remoteForceCommand = null;
+        let instantRollInProgress = false;
+        async function claimRemoteForceCommand() {
+            if (!remoteForceCommand || !cloudReady || !cloudDb) return false;
+            const command = remoteForceCommand;
+            const channel = sanitizeChannelName(currentChannelName) || 'global';
+            const commandRef = cloudDb.collection('remoteCommands').doc(`cmd_${channel}`);
+            try {
+                return await cloudDb.runTransaction(async (transaction) => {
+                    const snapshot = await transaction.get(commandRef);
+                    const data = snapshot.exists ? snapshot.data() || {} : {};
+                    const sameCommand = data.commandId === command.commandId && data.consumed !== true;
+                    if (!sameCommand) return false;
+                    transaction.update(commandRef, {
+                        consumed: true,
+                        consumedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    });
+                    return true;
+                });
+            } catch (error) {
+                console.error('Remote command claim error:', error);
+                return false;
+            }
+        }
+
+        async function instantRoll() {
+            if (instantRollInProgress) return;
+            instantRollInProgress = true;
             const arr = getActiveParticipants();
             if (arr.length < 1 && (!adminRigMode || !adminRigNick100)) {
+                instantRollInProgress = false;
                 return alert('Нет участников!');
+            }
+            const claimed = await claimRemoteForceCommand();
+            if (remoteForceCommand && !claimed) {
+                remoteForceCommand = null;
+                adminRigMode = null;
+                adminRigNick100 = '';
+                adminRigOnceUsed = false;
+                updateAdminStatus();
+                saveRigToStorage(false);
             }
             const win = pickRiggedWinner(arr);
             if (win) showWinnerRef(win);
+            instantRollInProgress = false;
         }
 
         // ===== Remote Controller: listen for commands from remote panel =====
-        let _lastRemoteCmdTs = null;
+        let _lastRemoteCmdKey = null;
         let remoteCmdUnsubscribe = null;
         function subscribeRemoteCommands() {
             if (!cloudReady || !cloudDb) return;
@@ -2924,7 +2962,7 @@
                 try { remoteCmdUnsubscribe(); } catch (error) {}
                 remoteCmdUnsubscribe = null;
             }
-            _lastRemoteCmdTs = null;
+            _lastRemoteCmdKey = null;
 
             const channel = sanitizeChannelName(currentChannelName) || 'global';
             const docId = `cmd_${channel}`;
@@ -2935,19 +2973,30 @@
                     const timestamp = data.ts && typeof data.ts.toMillis === 'function'
                         ? data.ts.toMillis()
                         : Number(data.ts);
-                    if (!Number.isFinite(timestamp) || timestamp === _lastRemoteCmdTs) return;
-                    _lastRemoteCmdTs = timestamp;
+                    const commandKey = typeof data.commandId === 'string' && data.commandId
+                        ? data.commandId
+                        : (Number.isFinite(timestamp) ? String(timestamp) : null);
+                    if (!commandKey || commandKey === _lastRemoteCmdKey) return;
+                    _lastRemoteCmdKey = commandKey;
 
                     const action = typeof data.action === 'string' ? data.action : '';
                     const nick = typeof data.nick === 'string' ? data.nick.trim() : '';
 
                     if ((action === 'forceRoll' || action === 'setRig100') && nick) {
+                        if (data.consumed === true) {
+                            remoteForceCommand = null;
+                            return;
+                        }
+                        remoteForceCommand = {
+                            commandId: typeof data.commandId === 'string' ? data.commandId : '',
+                            nick,
+                        };
                         // The remote command only arms the next quick roll.
                         adminRigNick100 = nick;
                         adminRigMode = '100';
                         adminRigOnceUsed = false;
                         updateAdminStatus();
-                        saveRigToStorage();
+                        saveRigToStorage(false);
                     } else if (action === 'clearRig') {
                         adminRigMode = null;
                         adminRigNick100 = '';
@@ -3055,7 +3104,7 @@
             updateAdminStatus();
         }
 
-        function saveRigToStorage() {
+        function saveRigToStorage(syncCloud = true) {
             const key = getRigStorageKey();
             const data = { mode: adminRigMode, nick100: adminRigNick100, nickSoft: adminRigNickSoft, onceUsed: adminRigOnceUsed };
             try {
@@ -3063,7 +3112,7 @@
             } catch (error) {
                 console.warn('Unable to save rig state locally:', error);
             }
-            syncRigToCloud();
+            if (syncCloud) syncRigToCloud();
         }
 
         async function loadRigForCurrentChannel() {
