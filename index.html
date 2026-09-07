@@ -188,37 +188,7 @@
                 transform: translateY(-14px) scaleX(1.04);
             }
         }
-        .theme-switcher {
-            position: fixed;
-            top: 24px;
-            left: 68px;
-            z-index: 10001;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            border-radius: 14px;
-            border: 1px solid var(--panel-border);
-            box-shadow: inset 0 0 18px rgba(0,0,0,0.28);
-            background: transparent; /* Ensure no background */
-        }
-        .theme-switcher label {
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            color: var(--accent-neon-blue);
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-        .theme-switcher select {
-            background: var(--dark-purple);
-            color: var(--soft-light);
-            border: 1px solid var(--accent-neon-blue);
-            border-radius: 10px;
-            padding: 8px 10px;
-            font-size: 12px;
-            outline: none;
-        }
+        
         .menu-panel .btn-main, .menu-panel .btn-purple, .menu-panel .btn-codeword {
             font-family: 'Orbitron', 'Inter', sans-serif;
             font-weight: 800;
@@ -1098,26 +1068,18 @@
             position: relative;
             z-index: 1;
         }
+.menu-controls {
+            transform: translateY(-150px);
+            position: relative;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
     <video id="bgVideo" autoplay muted loop playsinline>
         <source src="fon123.mp4" type="video/mp4" />
     </video>
-    <div class="theme-switcher">
-        <label for="theme-select" style="margin-left: -10px;">ЦВЕТ</label>
-        <select id="theme-select" onchange="applyTheme(this.value)" style="margin-left: 0px;">
-            <option value="pink">Розовый</option>
-            <option value="blue">Синий</option>
-            <option value="purple">Фиолетовый</option>
-            <option value="green">Зеленый</option>
-            <option value="red">Красный</option>
-            <option value="orange">Оранжевый</option>
-            <option value="yellow">Желтый</option>
-            <option value="cyan">Бирюзовый</option>
-        </select>
-        <div id="cloud-status" style="margin-left:12px; font-size:12px; color:#94a3b8;">Cloud: —</div>
-    </div>
+    <div id="cloud-status" style="position:fixed; top:24px; left:68px; z-index:10001; font-size:12px; color:#94a3b8;"></div>
     <div class="container">
         <div class="panel menu-panel">
             <div class="menu-ambient" aria-hidden="true">
@@ -1129,6 +1091,7 @@
                 <div class="menu-wave wave-b"></div>
             </div>
             <div style="flex: 1;"></div>
+            <div class="menu-controls">
             <button class="btn-main" onclick="resetAll()">Сброс участников</button>
             <button class="btn-main btn-codeword" onclick="changeCodeword()">КОД: <span id="codeword-display">NRG</span></button>
             <button class="btn-main btn-purple" onclick="openWheel()">РУЛЕТКА</button>
@@ -1176,6 +1139,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
         <div class="panel panel-with-bg" style="padding: 15px;">
@@ -1553,7 +1517,7 @@
         }
 
         // ===== Site options =====
-        const siteOptions = ['SkinBro', 'Petuh', 'SkinHouse', 'Upgrader', 'DinoDrop', 'SnakeSkin', 'Jabka', 'CSGORUN', 'Case-Battle'];
+        const siteOptions = ['SkinBro', 'Petuh', 'SkinHouse', 'Upgrader', 'DinoDrop', 'SnakeSkin', 'Jabka', 'CSGORUN', 'Case-Battle', 'Skinity'];
 
         function renderSiteSelects() {
             const winSel = document.getElementById('win-site-select');
@@ -1845,10 +1809,6 @@
             root.style.setProperty('--panel-border', theme.border);
             document.body.style.backgroundImage = theme.bgGlow;
             localStorage.setItem('bot_theme_name', themeName);
-            const selector = document.getElementById('theme-select');
-            if (selector && selector.value !== themeName) {
-                selector.value = themeName;
-            }
         }
         function sanitizeChannelName(value) {
             return String(value || '').trim().toLowerCase().replace(/^@+/, '').replace(/\s+/g, '').replace(/[^a-z0-9_]/g, '');
