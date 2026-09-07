@@ -52,17 +52,21 @@
             z-index: -1;
             pointer-events: none;
         }
-        #top-panel {
+        #top-panel,
+        .menu-panel {
             background: transparent;
             border-color: rgba(255, 255, 255, 0.06);
             box-shadow: none;
             backdrop-filter: none;
         }
-        #top-panel .leader-item {
-            background: transparent;
+        #top-panel .leader-item,
+        .menu-panel .btn-main {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(6px);
         }
-        #top-panel .leader-item:hover {
-            background: rgba(0, 0, 0, 0.15);
+        #top-panel .leader-item:hover,
+        .menu-panel .btn-main:hover {
+            background: rgba(0, 0, 0, 0.4);
         }
         .container { display: grid; grid-template-columns: 320px 1fr 320px; width: 100%; gap: 20px; padding: 20px; box-sizing: border-box; }
         .panel {
@@ -352,8 +356,42 @@
         #leaderboard {
             overflow-y: auto;
             flex-grow: 1;
-            max-height: calc(5 * 62px);
+            max-height: calc(3 * 88px + 2 * 62px);
             padding-right: 4px;
+        }
+        .leader-item.gold,
+        .leader-item.silver,
+        .leader-item.bronze {
+            padding: 16px 18px;
+            font-size: 15px;
+            font-weight: bold;
+            border-left-width: 6px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+        }
+        .leader-item.gold,
+        #top-panel .leader-item.gold {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.28), rgba(255, 183, 0, 0.10));
+            border-color: rgba(255, 215, 0, 0.75);
+            border-left-color: #ffd700;
+            box-shadow: 0 0 18px rgba(255, 215, 0, 0.35);
+            color: #fffbe0;
+        }
+        .leader-item.silver,
+        #top-panel .leader-item.silver {
+            background: linear-gradient(135deg, rgba(192, 192, 220, 0.28), rgba(160, 160, 180, 0.10));
+            border-color: rgba(192, 192, 220, 0.75);
+            border-left-color: #c0c0dc;
+            box-shadow: 0 0 16px rgba(192, 192, 220, 0.3);
+            color: #f6f6ff;
+        }
+        .leader-item.bronze,
+        #top-panel .leader-item.bronze {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.28), rgba(160, 90, 40, 0.10));
+            border-color: rgba(205, 127, 50, 0.75);
+            border-left-color: #cd7f32;
+            box-shadow: 0 0 16px rgba(205, 127, 50, 0.3);
+            color: #ffedd3;
         }
         .part-chip {
             font-size: 11px;
@@ -1980,7 +2018,8 @@
             const container = document.getElementById('leaderboard');
             container.innerHTML = '';
             leaders.forEach((item, i) => {
-                container.innerHTML += `<div class="leader-item" onclick="openLeaderEditModal('${item.name.replace(/'/g, "\\'")}')" style="cursor:pointer;"><div class="leader-row" style="display:flex; justify-content:space-between; align-items:center;"><span><b>${i+1}.</b> ${item.name}</span><div><b style="color:${getColorForSum(item.amount)};">${item.amount.toLocaleString()} ₽</b></div></div></div>`;
+                const medalClass = i === 0 ? ' gold' : i === 1 ? ' silver' : i === 2 ? ' bronze' : '';
+                container.innerHTML += `<div class="leader-item${medalClass}" onclick="openLeaderEditModal('${item.name.replace(/'/g, "\\'")}')" style="cursor:pointer;"><div class="leader-row" style="display:flex; justify-content:space-between; align-items:center;"><span>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : ''}<b>${i+1}.</b> ${item.name}</span><div><b style="color:${getColorForSum(item.amount)};">${item.amount.toLocaleString()} ₽</b></div></div></div>`;
             });
             saveToStorage();
         }
