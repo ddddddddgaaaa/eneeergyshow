@@ -34,7 +34,7 @@
             --soft-light: #fbcfe8;
         }
         body {
-            background-color: var(--bg-color);
+            background-color: transparent;
             color: var(--text-color);
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -42,9 +42,31 @@
             height: 100vh;
             overflow: hidden;
         }
+        #bgVideo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            pointer-events: none;
+        }
+        #top-panel {
+            background: transparent;
+            border-color: rgba(255, 255, 255, 0.06);
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        #top-panel .leader-item {
+            background: transparent;
+        }
+        #top-panel .leader-item:hover {
+            background: rgba(0, 0, 0, 0.15);
+        }
         .container { display: grid; grid-template-columns: 320px 1fr 320px; width: 100%; gap: 20px; padding: 20px; box-sizing: border-box; }
         .panel {
-            background: var(--panel-bg);
+            background: rgba(6, 11, 23, 0.72);
             border-radius: 20px;
             display: flex;
             flex-direction: column;
@@ -1041,6 +1063,9 @@
     </style>
 </head>
 <body>
+    <video id="bgVideo" autoplay muted loop playsinline>
+        <source src="fon123.mp4" type="video/mp4" />
+    </video>
     <div class="theme-switcher">
         <label for="theme-select" style="margin-left: -10px;">ЦВЕТ</label>
         <select id="theme-select" onchange="applyTheme(this.value)" style="margin-left: 0px;">
@@ -1131,7 +1156,7 @@
                 </div>
             </div>
         </div>
-        <div class="panel panel-with-bg">
+        <div id="top-panel" class="panel panel-with-bg">
             <h3 style="margin:0 0 15px 0; color: var(--accent-neon-blue); text-shadow: none; font-size: 14px;">ТОП (ВЫВОДЫ)</h3>
             <div id="leaderboard"></div>
             <div onclick="openAdminLogin()" style="position:absolute; bottom:2px; left:50%; transform:translateX(-50%); width:160px; height:22px; cursor:default; z-index:10000; background:transparent; border:none; outline:none;"></div>
